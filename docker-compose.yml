@@ -1,0 +1,42 @@
+version: '3.4'
+networks:
+  app-tier:
+    driver: bridge
+services:
+  postgres:
+    container_name: "db"
+    image: postgres
+    restart: always
+    expose: 
+      - "5432"
+    ports:
+      - "5432:5432"
+    networks: 
+      - app-tier
+    environment:
+      POSTGRES_DB: "test"
+      POSTGRES_USER: "test"
+      POSTGRES_PASSWORD: "test"
+  server:
+    depends_on: 
+      - postgres
+    image: server
+    build: ./server
+    volumes:
+      - ./server:/server
+      - /server/node_modules
+    restart: always
+    ports:
+      - "4000:4000"
+    networks: 
+      - app-tier
+  client:
+    image: client
+    build: ./client
+    volumes: 
+      - ./client:/client
+      - /client/node_modules
+    ports: 
+      - "3000:3000"
+    networks: 
+      - app-tier
