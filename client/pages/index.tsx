@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { Messages, Rooms } from '../components'
 import { useSockets } from '../context/socket.context'
 import styles from '../styles/Home.module.css'
@@ -14,12 +14,15 @@ export default function Home() {
     setUsername(value);
     localStorage.setItem('username', value);
   }
+  useEffect(() => {
+    usernameRef.current.value = localStorage.getItem('username') || ''
+  }, [])
   return (<div>
     {!username && (
       <div className={styles.usernameWrapper}>
         <div className={styles.usernameInner}>
           <input placeholder="Username" ref={usernameRef} />
-          <button onClick={handleSetUsername}>Start</button>
+          <button className="cta" onClick={handleSetUsername}>Start</button>
         </div>
       </div>
     )}

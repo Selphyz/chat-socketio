@@ -8,6 +8,7 @@ const socket=({io}: {io: Server})=>{
     logger.info(`Sockets active`);
     io.on(EVENTS.connection, (socket: Socket)=>{
         logger.info(`User connected ${socket.id}`);
+        socket.emit(EVENTS.SERVER.rooms, rooms);
         socket.on(EVENTS.CLIENT.create_room, ({roomName})=>{
             console.log({roomName});
             const roomId = nanoid();
@@ -19,14 +20,17 @@ const socket=({io}: {io: Server})=>{
             socket.emit(EVENTS.SERVER.rooms, rooms);
             socket.emit(EVENTS.SERVER.joined_room, roomId);
         })
-        socket.on(EVENTS.CLIENT.send_room_message, 
-          ({roomId, message, username})=>{
+        socket.on(EVENTS.CLIENT.send_room_message, ({roomId, message, username})=>{
             const date = new Date();
             socket.to(roomId).emit(EVENTS.SERVER.room_message, {
               message,
               username,
               time: `${date.getHours()}:${date.getMinutes()}`,
             });
+        });
+        socket.on(EVENTS.CLIENT.join_room, (roomId)=> {
+            socket.join(roomId);
+            socket.emit(EVENTS.SERVER.joined_room, roomId);
         });
     });
 }

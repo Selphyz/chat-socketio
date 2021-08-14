@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { useSockets } from "../context/socket.context"
 import EVENTS from "../events/events";
+import styles from "../styles/Room.module.css"
 
 export const Rooms = () => {
     const { socket, roomId, rooms } = useSockets();
@@ -11,13 +12,26 @@ export const Rooms = () => {
         socket.emit(EVENTS.CLIENT.create_room, { roomName });
         newRoomRef.current.value = '';
     }
-    return (<nav>
-        <div><input ref={newRoomRef} placeholder="Room name" />
+    const handleJoinRoom = (roomKey: string) => {
+        if (roomId === roomKey) return;
+        socket.emit(EVENTS.CLIENT.join_room, roomKey);
+    }
+    return (<nav className={styles.wrapper}>
+        <div className={styles.createRoomWrapper}>
+            <input ref={newRoomRef} placeholder="Room name" />
             <button onClick={handleCreateRoom}>Create room</button>
         </div>
-        {Object.keys(rooms).map((key) => {
-            return <div key={key}>{key}&nbsp;{rooms[key].name}</div>
-        })}
+        <ul className={styles.roomList}>
+            {Object.keys(rooms).map((roomKey) => {
+                return <div key={roomKey}>
+                    <button disabled={roomKey === roomId}
+                        title={`Join ${rooms[roomKey].name}`}
+                        onClick={() => handleJoinRoom(roomKey)}
+                    >{roomKey === roomId ? 'active room' : null}&nbsp;{rooms[roomKey].name}
+                    </button>
+                </div>
+            })}
+        </ul>
     </nav>
     );
 }
